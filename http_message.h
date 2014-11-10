@@ -57,7 +57,6 @@ struct HttpResponse {
   // Status Line
   enum HttpVersion version;
   enum StatusCode status;
-  char *reason_phrase;
   // General Headers
   char *date;
   char *pragma;
@@ -75,5 +74,14 @@ struct HttpResponse {
   // Entity Body
   char *body;
 };
+
+struct HttpRequest *HttpRequest_create(enum MethodType method,
+                                       enum HttpVersion version,
+                                       char *uri);
+void HttpRequest_destroy(struct HttpRequest *request);
+
+struct HttpResponse *HttpResponse_create(enum HttpVersion version,
+                                         enum StatusCode status);
+void HttpResponse_destroy(struct HttpResponse *response);
 
 #endif

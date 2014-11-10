@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "http_message.h"
 
@@ -24,6 +27,7 @@ const struct http_entry http_version[] =
     {"HTTP/1.0", HTTP_1_0}
   };
 
+// status code and reason phrase
 const char* status_text[] =
   {
     [OK] = "200 OK",
@@ -42,3 +46,67 @@ const char* status_text[] =
     [BAD_GATEWAY] = "502 Bad Gateway",
     [SERVICE_UNAVAILABLE] = "503 Service Unavailable"
   };
+
+struct HttpRequest *HttpRequest_create(enum MethodType method,
+                                       enum HttpVersion version,
+                                       char *uri)
+{
+  struct HttpRequest *request = malloc(sizeof(struct HttpRequest));
+  assert(request != NULL);
+
+  request->method = method;
+  request->version = version;
+  request->uri = strdup(uri);
+  request->date = NULL;
+  request->pragma = NULL;
+  request->if_modified_since = NULL;
+  request->user_agent = NULL;
+  request->allow = NULL;
+  request->content_encoding = NULL;
+  request->content_length = 0;
+  request->content_type = NULL;
+  request->expires = NULL;
+  request->last_modified = NULL;
+  request->body = NULL;
+
+  return request;
+}
+
+void HttpRequest_destroy(struct HttpRequest *request)
+{
+  assert(request != NULL);
+
+  free(request->uri);
+  free(request);
+}
+
+struct HttpResponse *HttpReesponse_create(enum HttpVersion version,
+                                          enum StatusCode status)
+{
+  struct HttpResponse *response = malloc(sizeof(struct HttpResponse));
+  assert(response != NULL);
+
+  response->version = version;
+  response->status = status;
+  response->date = NULL;
+  response->pragma = NULL;
+  response->location = NULL;
+  response->server = NULL;
+  response->www_authenticate = NULL;
+  response->allow = NULL;
+  response->content_encoding = NULL;
+  response->content_length = 0;
+  response->content_type = NULL;
+  response->expires = NULL;
+  response->last_modified = NULL;
+  response->body = NULL;
+
+  return response;
+}
+
+void HttpResponse_destroy(struct HttpResponse *response)
+{
+  assert(response != NULL);
+  
+  free(response);
+}
