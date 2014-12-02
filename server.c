@@ -5,13 +5,36 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+//#include "http_request.h"
 #include "server.h"
+#include "strbuffer.h"
 
 // Maximum length of queue for connections
 #define BACKLOG 5
 
+#define BUFLEN 128
+
 static int portnum;
 static int sockfd;
+
+void handle_request(int sockfd)
+{
+  int n;
+  char buffer[BUFLEN];
+  struct StrBuffer *str = StrBuffer_create();
+  
+  do {
+    if((n = recv(sockfd, buffer, BUFLEN, 0)) == -1)
+      goto error;
+
+    StrBuffer_append(str, buffer, n);
+  } while(n == BUFLEN);
+
+  StrBuffer_append(str, "\0", 1);
+  printf("%s", str->buf);
+ error:
+  StrBuffer_destroy(str);
+}
 
 void end_server()
 {
@@ -71,6 +94,7 @@ void run_server()
     if(pid == 0) {
       // handle request
       printf("Handling request\n");
+      handle_request(newsockfd);
       run = 0;
     }
     close(newsockfd);
